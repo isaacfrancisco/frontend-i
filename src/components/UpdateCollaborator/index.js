@@ -10,18 +10,10 @@ import api from '../../services/api';
 import EditIcon from '@material-ui/icons/Edit';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
-
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const error = {
-    color: 'red',
-    fontSize: '12px',
-    position: 'relative'
-}
+import Typography from '@material-ui/core/Typography';
+import { Grid } from '@material-ui/core';
+import { error, snackbarSuccess, snackbarError } from '../../styles';
+import { useSnackbar } from 'notistack';
 
 export default function UpdateCollaborator(props) {
     const {
@@ -34,19 +26,19 @@ export default function UpdateCollaborator(props) {
 
     const [name, setName] = useState('');
     const [pis, setPis] = useState('');
-    const [registration, setRegistration] = useState('');
+    const [matriculation, setMatriculation] = useState('');
 
     const [errorText, setErrorText] = useState('');
+    const [textErrorPis, setTextErrorPis] = useState('');
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const [openDialog, setOpenDialog] = useState(false);
-
-    const [openSnackbar, setOpenSnackbar] = React.useState(false);
-    const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
 
     const handleOpen = () => {
         setName(nome);
         setPis(pisColaborador);
-        setRegistration(matricula);
+        setMatriculation(matricula);
         setOpenDialog(true);
     };
 
@@ -54,32 +46,27 @@ export default function UpdateCollaborator(props) {
         setOpenDialog(false);
     };
 
-    const handleOpenSnackbar = () => {
-        setOpenSnackbar(true);
-    };
-
-    const handleOpenErrorSnackbar = () => {
-        setOpenErrorSnackbar(true);
-    };
-
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
+    const handlePis = (e) => {
+        e = e.replace(/\D/g, "");
+        if (e.length < 12) {
+            setTextErrorPis('É necessário inserir 12 digitos.');
+        } else {
+            setTextErrorPis('');
         }
-
-        setOpenSnackbar(false);
-    };
-
-    const handleCloseErrorSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        setOpenErrorSnackbar(false);
-    };
+        setPis(e);
+    }
+    const handleRegistration = (e) => {
+        e = e.replace(/\D/g, "");
+        setMatriculation(e);
+    }
 
     async function handleUpdate(e) {
         e.preventDefault();
+        var zero = '';
+        for (var i = 1; i <= 16 - matriculation.length; i++) {
+            zero += '0';
+        }
+        var registration = zero + matriculation;
 
         if (name === '' || pis === '' || registration === '') {
             setErrorText('Digite os dados corretamente!');
@@ -93,11 +80,15 @@ export default function UpdateCollaborator(props) {
                 setErrorText('');
                 handleRefresh();
                 handleClose();
-                handleOpenSnackbar();
+                enqueueSnackbar('Colaborador editado com sucesso!', snackbarSuccess);
             } catch (err) {
                 console.log(err);
+                if (err.response.data.error === "pis already registered") {
+                    enqueueSnackbar('Este PIS já foi cadastrado!', snackbarError);
+                } else {
+                    enqueueSnackbar('Erro ao editar o colaborador!', snackbarError);
+                }
                 setErrorText('');
-                handleOpenErrorSnackbar();
             }
         }
     }
@@ -132,17 +123,20 @@ export default function UpdateCollaborator(props) {
                         label="PIS"
                         type="text"
                         value={pis}
-                        onChange={(e) => setPis(e.target.value)}
+                        onChange={(e) => handlePis(e.target.value)}
                         variant="outlined"
                         fullWidth
                     />
+                    <Grid item sm={12}>
+                        {textErrorPis && <Typography style={error}>{textErrorPis}</Typography>}
+                    </Grid>
                     <TextField
                         margin="dense"
                         id="registration"
                         label="Matrícula"
                         type="text"
-                        value={registration}
-                        onChange={(e) => setRegistration(e.target.value)}
+                        value={matriculation}
+                        onChange={(e) => handleRegistration(e.target.value)}
                         variant="outlined"
                         fullWidth
                     />
@@ -156,16 +150,6 @@ export default function UpdateCollaborator(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Snackbar open={openSnackbar} autoHideDuration={2000} onClose={handleCloseSnackbar}>
-                <Alert onClose={handleCloseSnackbar} severity="success">
-                    Colaborador editado com sucesso!
-                </Alert>
-            </Snackbar>
-            <Snackbar open={openErrorSnackbar} autoHideDuration={2000} onClose={handleCloseErrorSnackbar}>
-                <Alert onClose={handleCloseErrorSnackbar} severity="error">
-                    Erro ao editar o colaborador!
-                </Alert>
-            </Snackbar>
         </span>
     );
 }

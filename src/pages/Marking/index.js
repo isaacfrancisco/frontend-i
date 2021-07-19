@@ -7,20 +7,18 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import { Grid } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
 import api from '../../services/api';
-import UpdateCollaborator from "../../components/UpdateCollaborator";
 import DeleteCollaborator from "../../components/DeleteCollaborator";
-import CreateCollaborator from "../../components/CreateCollaborator";
+import ImportMarking from "../../components/ImportMarking";
 import { useStyles, paperStyle, greenButton } from '../../styles';
 import { Sidebar } from "../../components/Sidebar";
 
-const columns = ["Nome", "Pis", "Matrícula", "Ações"];
+const columns = ["Registro Sequencial", "Tipo de Ponto", "Colaborador", "Data", "Hora", "Ponto Completo"];
 
 const options = {
     textLabels: {
         body: {
-            noMatch: "Nenhum colaborador cadastrado",
+            noMatch: "Nenhum ponto cadastrado",
             toolTip: "Ordenar",
             columnHeaderTooltip: column => `Ordenar por ${column.label}`
         },
@@ -39,25 +37,19 @@ const options = {
     filter: false
 };
 
-export default function Home() {
-    const [collaborators, setCollaborators] = useState([]);
-    const [searchData, setSearchData] = useState([]);
-
-    const [project, setProject] = useState('');
-
-    const history = useHistory();
+export default function Marking() {
+    const [markings, setMarkings] = useState([]);
 
     const classes = useStyles();
-
 
     const [openDialogName, setOpenDialog] = React.useState(false);
     const handleClose = () => setOpenDialog(false);
 
-    const openCreateDialog = () => {
-        setOpenDialog('CREATE');
+    const openImportDialog = () => {
+        setOpenDialog('IMPORT');
     }
     const openSearchDialog = () => {
-        setProject('');
+
         setOpenDialog('SEARCH');
     }
 
@@ -66,41 +58,38 @@ export default function Home() {
     }, []);
 
     async function handleShowCollaborators() {
-        setCollaborators([]);
-        var id, nome, pis, matricula;
+        setMarkings([]);
+        var id, registroSequencial, tipoPonto, colaborador, dataPonto, hora, pontoCompleto;
         const data = [];
-        const collaborators = [];
         try {
-            const response = await api.get("/collaborators");
-            for (let i = 0; i < response.data.collaborators.length; i++) {
-                id = response.data.collaborators[i].id;
-                nome = response.data.collaborators[i].name;
-                pis = response.data.collaborators[i].pis;
-                matricula = response.data.collaborators[i].registration;
+            const response = await api.get("/markings");
+            console.log(response.data);
+            for (let i = 0; i < response.data.markings.length; i++) {
+                id = response.data.markings[i].id;
+                registroSequencial = response.data.markings[i].sequential_record;
+                tipoPonto = response.data.markings[i].marking_type;
+                colaborador = response.data.markings[i].collaborator;
+                dataPonto = response.data.markings[i].marking_date;
+                hora = response.data.markings[i].marking_hour;
+                pontoCompleto = response.data.markings[i].completed_marking;
 
                 data.push([
-                    nome,
-                    pis,
-                    matricula,
+                    registroSequencial,
+                    tipoPonto,
+                    colaborador,
+                    dataPonto,
+                    hora,
+                    pontoCompleto,
                     <span>
-                        <UpdateCollaborator
-                            id={id}
-                            nome={nome}
-                            pisColaborador={pis}
-                            matricula={matricula}
-                            handleRefresh={(e) => handleRefresh()}
-                        />
                         <DeleteCollaborator
                             id={id}
                             handleRefresh={(e) => handleRefresh()}
                         />
                     </span>
                 ]);
-                collaborators.push({ nome, pis });
             }
-            localStorage.setItem('colaboradores', JSON.stringify(collaborators));
             console.log(data);
-            setCollaborators(data);
+            setMarkings(data);
         } catch (err) {
             console.log(err);
         }
@@ -137,21 +126,21 @@ export default function Home() {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="contained" color="primary" style={greenButton} onClick={openCreateDialog}>
-                                    Cadastrar Colaborador
+                                <Button variant="contained" color="primary" style={greenButton} onClick={openImportDialog}>
+                                    Importar Pontos
                                 </Button>
                             </Grid>
                         </Grid>
                     </Paper>
                     <MUIDataTable
-                        title={"Colaboradores"}
-                        data={collaborators}
+                        title={"Pontos dos colaboradores"}
+                        data={markings}
                         columns={columns}
                         options={options}
                     />
                 </main>
-                <CreateCollaborator
-                    open={openDialogName === 'CREATE'}
+                <ImportMarking
+                    open={openDialogName === 'IMPORT'}
                     onClose={handleClose}
                     handleRefresh={(e) => handleRefresh()}
                 />

@@ -8,21 +8,17 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import api from '../../services/api';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { snackbarSuccess, snackbarError } from '../../styles';
+import { useSnackbar } from 'notistack';
 
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
 
 export default function DeleteCollaborator(props) {
     const { id, handleRefresh } = props;
 
     const [openDialog, setOpenDialog] = useState(false);
 
-    const [openSnackbar, setOpenSnackbar] = React.useState(false);
-    const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleOpen = () => {
         setOpenDialog(true);
@@ -32,40 +28,16 @@ export default function DeleteCollaborator(props) {
         setOpenDialog(false);
     };
 
-    const handleOpenSnackbar = () => {
-        setOpenSnackbar(true);
-    };
-
-    const handleOpenErrorSnackbar = () => {
-        setOpenErrorSnackbar(true);
-    };
-
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        setOpenSnackbar(false);
-    };
-
-    const handleCloseErrorSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        setOpenErrorSnackbar(false);
-    };
-
     async function handleDelete(e) {
         e.preventDefault();
         try {
             await api.delete("/collaborators/" + id);
             handleRefresh();
             handleClose();
-            handleOpenSnackbar();
+            enqueueSnackbar('Colaborador removido com sucesso!', snackbarSuccess);
         } catch (err) {
             console.log(err);
-            handleOpenErrorSnackbar();
+            enqueueSnackbar('Erro ao remover o colaborador!', snackbarError);
         }
     }
 
@@ -92,16 +64,6 @@ export default function DeleteCollaborator(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Snackbar open={openSnackbar} autoHideDuration={2000} onClose={handleCloseSnackbar}>
-                <Alert onClose={handleCloseSnackbar} severity="success">
-                    Colaborador removido com sucesso!
-                </Alert>
-            </Snackbar>
-            <Snackbar open={openErrorSnackbar} autoHideDuration={2000} onClose={handleCloseErrorSnackbar}>
-                <Alert onClose={handleCloseErrorSnackbar} severity="error">
-                    Erro ao deletar o colaborador!
-                </Alert>
-            </Snackbar>
         </span>
     );
 }
