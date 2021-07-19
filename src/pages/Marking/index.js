@@ -48,10 +48,6 @@ export default function Marking() {
     const openImportDialog = () => {
         setOpenDialog('IMPORT');
     }
-    const openSearchDialog = () => {
-
-        setOpenDialog('SEARCH');
-    }
 
     useEffect(() => {
         handleShowCollaborators();
@@ -120,11 +116,6 @@ export default function Marking() {
                             justify="space-evenly"
                             alignItems="center"
                         >
-                            <Grid item>
-                                <Button variant="contained" color="primary" onClick={openSearchDialog}>
-                                    Buscar Projeto
-                                </Button>
-                            </Grid>
                             <Grid item>
                                 <Button variant="contained" color="primary" style={greenButton} onClick={openImportDialog}>
                                     Importar Pontos

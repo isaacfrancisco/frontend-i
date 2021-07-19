@@ -12,7 +12,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { snackbarSuccess, snackbarError } from '../../styles';
 import { useSnackbar } from 'notistack';
 
-
 export default function DeleteCollaborator(props) {
     const { id, handleRefresh } = props;
 

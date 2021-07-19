@@ -7,7 +7,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import { Grid } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
 import api from '../../services/api';
 import UpdateCollaborator from "../../components/UpdateCollaborator";
 import DeleteCollaborator from "../../components/DeleteCollaborator";
@@ -41,24 +40,14 @@ const options = {
 
 export default function Home() {
     const [collaborators, setCollaborators] = useState([]);
-    const [searchData, setSearchData] = useState([]);
-
-    const [project, setProject] = useState('');
-
-    const history = useHistory();
 
     const classes = useStyles();
-
 
     const [openDialogName, setOpenDialog] = React.useState(false);
     const handleClose = () => setOpenDialog(false);
 
     const openCreateDialog = () => {
         setOpenDialog('CREATE');
-    }
-    const openSearchDialog = () => {
-        setProject('');
-        setOpenDialog('SEARCH');
     }
 
     useEffect(() => {
@@ -131,11 +120,6 @@ export default function Home() {
                             justify="space-evenly"
                             alignItems="center"
                         >
-                            <Grid item>
-                                <Button variant="contained" color="primary" onClick={openSearchDialog}>
-                                    Buscar Projeto
-                                </Button>
-                            </Grid>
                             <Grid item>
                                 <Button variant="contained" color="primary" style={greenButton} onClick={openCreateDialog}>
                                     Cadastrar Colaborador
