@@ -9,6 +9,8 @@ import api from '../../services/api';
 import { useDropzone } from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
 import { error, baseStyle, acceptStyle, activeStyle, rejectStyle } from '../../styles';
+import { snackbarSuccess, snackbarError } from '../../styles';
+import { useSnackbar } from 'notistack';
 
 export default function ImportMarking(props) {
     var colaboradores = localStorage.getItem('colaboradores');
@@ -16,6 +18,8 @@ export default function ImportMarking(props) {
     const { open, onClose, handleRefresh } = props;
 
     const [selectedFile, setSelectedFile] = useState([]);
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const [textErrorImport, setTextErrorImport] = useState('');
 
@@ -110,8 +114,14 @@ export default function ImportMarking(props) {
             });
             handleRefresh();
             onClose();
+            enqueueSnackbar('Pontos importados com sucesso!', snackbarSuccess);
         } catch (err) {
-            console.log(err)
+            console.log(err);
+            if (err.response.data.error === "sequential_record already registered") {
+                enqueueSnackbar('Não é possivel importar pontos com registros sequenciais iguais!', snackbarError);
+            } else {
+                enqueueSnackbar('Erro ao editar o colaborador!', snackbarError);
+            }
         }
     }
 
